@@ -312,7 +312,7 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
   $scope.play = function(word) {
     if (word.blob) {
       var audio = new Audio();
-      audio.src = URL.createObjectURL(blob);
+      audio.src = URL.createObjectURL(word.blob);
       audio.play();
     } else {
       var audio = new Audio('upload/' + $scope.recorder + '/' + word.name + '.wav?cb=' + new Date().getTime());
