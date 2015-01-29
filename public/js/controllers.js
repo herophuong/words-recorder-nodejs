@@ -19,7 +19,7 @@ trvnApp.factory('WordRecorder', function($rootScope, $q) {
       navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
                     navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
-  if (navigator.getUserMedia){
+  if (navigator.getUserMedia) {
       navigator.getUserMedia({audio:true}, function(e) {
         $rootScope.$apply(function() { canRecord = true });
 
@@ -164,7 +164,7 @@ trvnApp.factory('WordRecorder', function($rootScope, $q) {
   };
 });
 
-trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, $timeout) {
+trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, $timeout, $interval) {
   $scope.words = [];
   $scope.recorder = null;
   $scope.logged_in = false;
@@ -187,6 +187,25 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
   $scope._filter = angular.copy($scope.filter);
   $scope.canRecord = WordRecorder.canRecord;
   $scope.recordProgress = WordRecorder.progress;
+
+  // Record options
+  $scope.option = {
+    "recordLength": 1000,
+    "waitingTime": 1000
+  };
+
+  // Option protection
+  $scope.$watch('option.recordLength', function(newValue) {
+    if (!(newValue <= 3000 && newValue >= 700)) {
+      $scope.option.recordLength = 1000;
+    }
+  });
+  $scope.$watch('option.waitingTime', function(newValue) {
+    if (!(newValue <= 2000 && newValue >= 0)) {
+      $scope.option.recordLength = 1000;
+    }
+  });
+
   $scope.totalRecorded = function() {
     var total = 0;
     for (var i = 0; i < $scope.words.length; i++) {
@@ -216,16 +235,23 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
   $scope.record = function(word) {
     if (!$scope.canRecord)
       return;
-    // Wait 1s to avoid recording mouse click
+
+    // Run a wait indicator for current word
     word.waiting = true;
+    word.waitingLeft = $scope.option.waitingTime;
+    var waitingIndicator = $interval(function() {
+      word.waitingLeft -= 100;
+      if (word.waitingLeft <= 0)
+        $interval.cancel(waitingIndicator);
+    },100);
+
+    // Wait some second to avoid recording mouse click
     $timeout(function () {
       word.waiting = false;
       word.recording = true;
       word.progress = 0;
-      var recordLength = 1000; // in ms
 
-
-      WordRecorder.record(recordLength).then(function(blob) {
+      WordRecorder.record($scope.option.recordLength).then(function(blob) {
         word.recording = false;
         word.uploading = true;
 
@@ -257,7 +283,7 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
       }, null, function (progress) {
         word.progress = (progress > 1) ? 1 : progress;
       });
-    }, 1000);
+    }, $scope.option.waitingTime);
   }
 
   $scope.logIn = function(recorder) {

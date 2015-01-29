@@ -58,13 +58,28 @@
     <div class="page-header">
         <h1>Công cụ thu âm <small>Sử dụng cho <a target="_blank" href="https://github.com/herophuong/vietnamese-words">cơ sở dữ liệu từ đơn tiếng việt <span class="glyphicon glyphicon-new-window"></span></a></small></h1>
     </div>
-    <div class="row">
-        <form>
-            <div class="form-group col-md-4" ng-if="logged_in">
-                <label for="filter-name">Tên từ</label>
-                <input id="filter-name" type="text" ng-model="filter.name" class="form-control" />
+    <div class="row" ng-if="logged_in">
+        <div class="col-md-3 form-horizontal">
+            <div class="text-center"><strong>Tuỳ chọn thu</strong></div>
+            <div class="form-group" style="margin-top: 16px;">
+                <label for="record-length" class="control-label col-md-7">Thời gian thu (ms)</label>
+                <div class="col-md-5">
+                    <input id="record-length" type="number" min="700" max="3000" step="100" ng-model="option.recordLength" class="form-control" />
+                </div>
             </div>
-            <div class="form-group col-md-4" ng-if="logged_in">
+            <div class="form-group">
+                <label for="record-length" class="control-label col-md-7">Thời gian chờ(ms)</label>
+                <div class="col-md-5">
+                    <input id="waiting-time" type="number" min="0" max="2000" step="100" ng-model="option.waitingTime" class="form-control" />
+                </div>
+            </div>
+        </div>
+        <form class="col-md-9" style="border-left: 1px dashed #babdb6">
+            <div class="form-group col-md-4">
+                <label for="filter-name">Tên từ</label>
+                <input id="filter-name" type="text" ng-model="filter.name" class="form-control" style="margin-top: 10px" />
+            </div>
+            <div class="form-group col-md-4">
                 <label>Thanh điệu</label>
                 <div class="checkbox-group">
                     <label>
@@ -93,7 +108,7 @@
                     </label>
                 </div>
             </div>
-            <div class="form-group col-md-4" ng-if="logged_in">
+            <div class="form-group col-md-4">
                 <label>Trạng thái</label>
                 <div class="checkbox-group">
                     <label>
@@ -107,7 +122,7 @@
                 </div>
             </div>
             <div class="clearfix"></div>
-            <div class="form-group text-right" ng-if="logged_in">
+            <div class="form-group text-right">
                 <button class="btn btn-primary" ng-click="updateQuery()"><span class="glyphicon glyphicon-filter"></span> Lọc từ</button>
             </div>
         </form>
@@ -130,7 +145,7 @@
                         Chưa thu
                     </span>
                     <span class="label label-default" ng-if="word.waiting">
-                        Hãy chờ 1s...
+                        Hãy chờ {{word.waitingLeft}}ms...
                     </span>
                     <span class="label label-warning" ng-if="word.recording">
                         Đang thu {{(word.progress * 100).toFixed(0)}}%
