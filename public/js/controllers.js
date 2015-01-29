@@ -229,6 +229,14 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
         word.recording = false;
         word.uploading = true;
 
+        // playback after recorded
+        var audio = new Audio();
+        audio.src = URL.createObjectURL(blob);
+        audio.play();
+
+        // attach blob to the model
+        word.blob = blob;
+
         // let's upload it
         var fd = new FormData();
         fd.append('recorder', $scope.recorder);
@@ -241,7 +249,7 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
           contentType: false
         }).done(function(data) {
           $scope.$apply(function() {
-            $scope.play(word);
+            // update word state
             word.recorded = true;
             word.uploading = false;
           });
@@ -276,8 +284,14 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
   }
 
   $scope.play = function(word) {
-    var audio = new Audio('upload/' + $scope.recorder + '/' + word.name + '.wav?cb=' + new Date().getTime());
-    audio.play();
+    if (word.blob) {
+      var audio = new Audio();
+      audio.src = URL.createObjectURL(blob);
+      audio.play();
+    } else {
+      var audio = new Audio('upload/' + $scope.recorder + '/' + word.name + '.wav?cb=' + new Date().getTime());
+      audio.play();
+    }
   }
 
   if ($cookies.recorder && $cookies.recorder != null) {
