@@ -16,6 +16,7 @@
         .checkbox-group {margin-top: 6px;}
         .checkbox-group label {margin-right: 10px;}
         .checkbox-group label input {float: left;}
+        .jumbotron h2 {margin-top: 0px}
     </style>
 </head>
 <body style="padding-top: 60px" ng-controller="WordCtrl">
@@ -116,7 +117,7 @@
             <tr>
                 <th width="10%">#</th>
                 <th width="20%">Từ đơn</th>
-                <th width="20%">Trạng thái</th>
+                <th width="20%">Trạng thái (Đã thu {{totalRecorded()}}/{{words.length}})</th>
                 <th width="20%">Hành động</th>
             </tr>
         </thead>
@@ -129,19 +130,19 @@
                         Chưa thu
                     </span>
                     <span class="label label-warning" ng-if="word.recording">
-                        Đang thu
+                        Đang thu {{(word.progress * 100).toFixed(0)}}%
                     </span>
                     <span class="label label-info" ng-if="word.uploading">
                         Đang tải lên
                     </span>
-                    <span class="label label-success" ng-if="word.recorded">
+                    <span class="label label-success" ng-if="word.recorded && !word.recording">
                         Đã thu
                     </span>
                 <td>
-                    <button class="btn btn-primary" ng-disabled="word.recording || word.uploading || !canRecord()" ng-click="record(word)">
+                    <button class="btn btn-sm btn-primary" ng-disabled="word.recording || word.uploading || !canRecord()" ng-click="record(word)">
                         <span class="glyphicon glyphicon-record"></span> Thu âm
                     </button>
-                    <button class="btn btn-success" ng-if="word.recorded" ng-click="play(word)">
+                    <button class="btn btn-sm btn-success" ng-if="word.recorded" ng-click="play(word)">
                         <span class="glyphicon glyphicon-play-circle"></span> Nghe lại
                     </button>
                 </td>
@@ -153,9 +154,9 @@
         Đang tải danh sách từ
       </div>
     </div>
-    <div class="alert alert-info" ng-if="!logged_in">
-        <h1>Vui lòng chọn tên</h1>
-        Bạn vui lòng đặt tên người thu và bấm Đăng nhập để bắt đầu thu âm với tên của bạn
+    <div class="jumbotron" ng-if="!logged_in">
+        <h2>Welcome!</h2>
+        <div>Hãy đăng nhập với tên người dùng đã được cấp của bạn để bắt đầu thu âm.</div>
     </div>
 </div>
 </body>

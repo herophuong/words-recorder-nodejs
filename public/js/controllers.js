@@ -3,7 +3,7 @@
  */
 var trvnApp = angular.module('trvnApp', ['ngCookies', 'infinite-scroll']);
 
-trvnApp.factory('WordRecorder', function($timeout) {
+trvnApp.factory('WordRecorder', function($rootScope, $q) {
   var canRecord = false;
   var recorder = null;
   var volume = null;
@@ -12,6 +12,7 @@ trvnApp.factory('WordRecorder', function($timeout) {
   var audioContext = null;
   var context = null;
   var bufferSize = 2048;
+  var progress = 0;
 
   // Detect audio recording
   if (!navigator.getUserMedia)
@@ -20,7 +21,7 @@ trvnApp.factory('WordRecorder', function($timeout) {
 
   if (navigator.getUserMedia){
       navigator.getUserMedia({audio:true}, function(e) {
-        $timeout(function() { canRecord = true }, 0);;
+        $rootScope.$apply(function() { canRecord = true });
 
         // creates the audio context
         audioContext = window.AudioContext || window.webkitAudioContext;
@@ -52,11 +53,12 @@ trvnApp.factory('WordRecorder', function($timeout) {
     alert('getUserMedia not supported in this browser.');
   }
 
-  var record = function(length, callback) {
+  var record = function(length) {
     var sampleLength = length * sampleRate / 1000;
     var leftchannel = [];
     var rightchannel = [];
     var recordingLength = 0;
+    var deferred = $q.defer();
 
     recorder.onaudioprocess = function(e) {
       if (recordingLength > sampleLength) {
@@ -101,7 +103,7 @@ trvnApp.factory('WordRecorder', function($timeout) {
 
         // our final binary blob
         var blob = new Blob ( [ view ], { type : 'audio/wav' } );
-        callback(blob);
+        deferred.resolve(blob);
 
         return; // Stop here
       }
@@ -112,7 +114,13 @@ trvnApp.factory('WordRecorder', function($timeout) {
       leftchannel.push (new Float32Array (left));
       rightchannel.push (new Float32Array (right));
       recordingLength += bufferSize;
+      $rootScope.$apply(function() {
+        // notify progress
+        deferred.notify(recordingLength / sampleLength);
+      });
     }
+
+    return deferred.promise;
   }
 
   var interleave = function (leftChannel, rightChannel){
@@ -178,6 +186,15 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder) 
   $scope.totalDisplayed = 100;
   $scope._filter = angular.copy($scope.filter);
   $scope.canRecord = WordRecorder.canRecord;
+  $scope.recordProgress = WordRecorder.progress;
+  $scope.totalRecorded = function() {
+    var total = 0;
+    for (var i = 0; i < $scope.words.length; i++) {
+      if ($scope.words[i].recorded)
+        total += 1;
+    }
+    return total;
+  };
 
   var fuzzy_match = function(str,pattern){
       if (pattern.length > 0) {
@@ -200,7 +217,10 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder) 
     if (!$scope.canRecord)
       return;
     word.recording = true;
-    WordRecorder.record(1000, function(blob) {
+    word.progress = 0;
+    var recordLength = 1000; // in ms
+
+    WordRecorder.record(recordLength).then(function(blob) {
       word.recording = false;
       word.uploading = true;
 
@@ -221,6 +241,8 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder) 
           word.uploading = false;
         });
       });
+    }, null, function (progress) {
+      word.progress = (progress > 1) ? 1 : progress;
     });
   }
 
