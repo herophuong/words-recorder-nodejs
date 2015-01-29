@@ -126,8 +126,11 @@
                 <td>{{$index + 1}}</td>
                 <td>{{word.name}}</td>
                 <td>
-                    <span class="label label-default" ng-if="!word.recorded && !word.recording && !word.uploading">
+                    <span class="label label-default" ng-if="!word.uploading && !word.recording && !word.recorded">
                         Chưa thu
+                    </span>
+                    <span class="label label-default" ng-if="word.waiting">
+                        Hãy chờ 1s...
                     </span>
                     <span class="label label-warning" ng-if="word.recording">
                         Đang thu {{(word.progress * 100).toFixed(0)}}%
@@ -135,7 +138,7 @@
                     <span class="label label-info" ng-if="word.uploading">
                         Đang tải lên
                     </span>
-                    <span class="label label-success" ng-if="word.recorded && !word.recording">
+                    <span class="label label-success" ng-if="word.recorded && !word.waiting && !word.recording && !word.uploading">
                         Đã thu
                     </span>
                 <td>

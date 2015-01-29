@@ -164,7 +164,7 @@ trvnApp.factory('WordRecorder', function($rootScope, $q) {
   };
 });
 
-trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder) {
+trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, $timeout) {
   $scope.words = [];
   $scope.recorder = null;
   $scope.logged_in = false;
@@ -216,34 +216,40 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder) 
   $scope.record = function(word) {
     if (!$scope.canRecord)
       return;
-    word.recording = true;
-    word.progress = 0;
-    var recordLength = 1000; // in ms
+    // Wait 1s to avoid recording mouse click
+    word.waiting = true;
+    $timeout(function () {
+      word.waiting = false;
+      word.recording = true;
+      word.progress = 0;
+      var recordLength = 1000; // in ms
 
-    WordRecorder.record(recordLength).then(function(blob) {
-      word.recording = false;
-      word.uploading = true;
 
-      // let's upload it
-      var fd = new FormData();
-      fd.append('recorder', $scope.recorder);
-      fd.append('data', blob, word.name + '.wav');
-      $.ajax({
-        type: 'POST',
-        url: 'upload',
-        data: fd,
-        processData: false,
-        contentType: false
-      }).done(function(data) {
-        $scope.$apply(function() {
-          $scope.play(word);
-          word.recorded = true;
-          word.uploading = false;
+      WordRecorder.record(recordLength).then(function(blob) {
+        word.recording = false;
+        word.uploading = true;
+
+        // let's upload it
+        var fd = new FormData();
+        fd.append('recorder', $scope.recorder);
+        fd.append('data', blob, word.name + '.wav');
+        $.ajax({
+          type: 'POST',
+          url: 'upload',
+          data: fd,
+          processData: false,
+          contentType: false
+        }).done(function(data) {
+          $scope.$apply(function() {
+            $scope.play(word);
+            word.recorded = true;
+            word.uploading = false;
+          });
         });
+      }, null, function (progress) {
+        word.progress = (progress > 1) ? 1 : progress;
       });
-    }, null, function (progress) {
-      word.progress = (progress > 1) ? 1 : progress;
-    });
+    }, 1000);
   }
 
   $scope.logIn = function(recorder) {
