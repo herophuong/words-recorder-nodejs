@@ -145,23 +145,29 @@
                         Chưa thu
                     </span>
                     <span class="label label-default" ng-if="word.waiting">
-                        Hãy chờ {{word.waitingLeft}}ms...
+                        <span class="glyphicon glyphicon-hourglass"></span> Hãy chờ {{word.waitingLeft}}ms...
                     </span>
-                    <span class="label label-warning" ng-if="word.recording">
-                        Đang thu {{(word.progress * 100).toFixed(0)}}%
+                    <span class="label label-danger" ng-if="word.recording">
+                        <span class="glyphicon glyphicon-record"></span> Đang thu {{(word.progress * 100).toFixed(0)}}%
                     </span>
                     <span class="label label-info" ng-if="word.uploading">
-                        Đang tải lên
+                        <span class="glyphicon glyphicon-open"></span> Đang tải lên
                     </span>
-                    <span class="label label-success" ng-if="word.recorded && !word.waiting && !word.recording && !word.uploading">
-                        Đã thu
+                    <span class="label label-info" ng-if="word.downloading">
+                        <span class="glyphicon glyphicon-save"></span>Đang tải xuống
+                    </span>
+                    <span class="label label-warning" ng-if="word.playing">
+                        <span class="glyphicon glyphicon-play-circle"></span> Đang phát
+                    </span>
+                    <span class="label label-success" ng-if="word.recorded && !word.waiting && !word.recording && !word.uploading && !word.downloading && !word.playing">
+                      <span class="glyphicon glyphicon-ok"></span> Đã thu
                     </span>
                 <td>
-                    <button class="btn btn-sm btn-primary" ng-disabled="word.recording || word.uploading || !canRecord()" ng-click="record(word)">
+                    <button class="btn btn-sm btn-primary" ng-disabled="word.waiting || word.recording || word.uploading || !canRecord()" ng-click="record(word)">
                         <span class="glyphicon glyphicon-record"></span> Thu âm
                     </button>
                     <button class="btn btn-sm btn-success" ng-if="word.recorded" ng-click="play(word)" ng-disabled="word.downloading || word.playing">
-                        <span class="glyphicon glyphicon-play-circle"></span> {{word.downloading ? "Đang tải" : (word.playing ? "Đang phát" : "Nghe lại")}}
+                        <span class="glyphicon glyphicon-play-circle"></span> Nghe lại
                     </button>
                 </td>
             </tr>

@@ -164,7 +164,7 @@ trvnApp.factory('WordRecorder', function($rootScope, $q) {
   };
 });
 
-trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, $timeout, $interval) {
+trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, $timeout, $interval, $sce) {
   $scope.words = [];
   $scope.recorder = null;
   $scope.logged_in = false;
@@ -326,7 +326,7 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
       });
     }
 
-    // Now add audio src 
+    // Now add audio src
     if (word.blob) {
       audio.src = URL.createObjectURL(word.blob);
     } else {
@@ -335,6 +335,7 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
     }
   }
 
+  // Auto login using cookies
   if ($cookies.recorder && $cookies.recorder != null) {
     $scope.logIn($cookies.recorder);
   }
