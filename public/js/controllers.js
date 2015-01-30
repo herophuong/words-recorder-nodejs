@@ -1,7 +1,7 @@
 /**
  * Angular App here
  */
-var trvnApp = angular.module('trvnApp', ['ngCookies', 'infinite-scroll']);
+var trvnApp = angular.module('trvnApp', ['ngCookies', 'infinite-scroll', 'ui.bootstrap']);
 
 trvnApp.factory('WordRecorder', function($rootScope, $q) {
   var canRecord = false;
@@ -184,7 +184,6 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
     "name" : ""
   };
   $scope.totalDisplayed = 100;
-  $scope._filter = angular.copy($scope.filter);
   $scope.canRecord = WordRecorder.canRecord;
   $scope.recordProgress = WordRecorder.progress;
 
@@ -206,6 +205,10 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
     }
   });
 
+  // Reset pagination when filter change to avoid UI freezing
+  var reset_pagination = function() {$scope.totalDisplayed = 100;};
+  $scope.$watch('filter', reset_pagination, true);
+
   $scope.totalRecorded = function() {
     var total = 0;
     for (var i = 0; i < $scope.words.length; i++) {
@@ -226,10 +229,10 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
 
   $scope.query = function(word) {
     return (
-      (word.recorded == false && $scope._filter.status.unrecorded ||
-      word.recorded && $scope._filter.status.recorded) &&
-      $scope._filter.diacritic[word.diacritic] &&
-      fuzzy_match(word.name, $scope._filter.name)
+      (word.recorded == false && $scope.filter.status.unrecorded ||
+      word.recorded && $scope.filter.status.recorded) &&
+      $scope.filter.diacritic[word.diacritic] &&
+      fuzzy_match(word.name, $scope.filter.name)
     );
   };
   $scope.record = function(word) {
@@ -300,13 +303,11 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
     delete $cookies.recorder;
   }
 
-  $scope.updateQuery = function() {
-    $scope.totalDisplayed = 100; // reset pagination to avoid UI freeze
-    $scope._filter = angular.copy($scope.filter);
-  }
-
   $scope.showMore = function() {
     $scope.totalDisplayed += 100;
+    if ($scope.totalDisplayed > $scope.words.length) {
+      $scope.totalDisplayed = $scope.words.length;
+    }
   }
 
   $scope.play = function(word) {
