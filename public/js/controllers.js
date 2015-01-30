@@ -310,13 +310,28 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
   }
 
   $scope.play = function(word) {
+    // Create new audio object then bind loading event to word object
+    var audio = new Audio();
+    audio.oncanplaythrough = function() {
+      $scope.$apply(function() {
+        word.downloading = false;
+        word.playing = true;
+      });
+      // play after ready
+      audio.play();
+    }
+    audio.onended = function() {
+      $scope.$apply(function() {
+        word.playing = false;
+      });
+    }
+
+    // Now add audio src 
     if (word.blob) {
-      var audio = new Audio();
       audio.src = URL.createObjectURL(word.blob);
-      audio.play();
     } else {
-      var audio = new Audio('upload/' + $scope.recorder + '/' + word.name + '.wav?cb=' + new Date().getTime());
-      audio.play();
+      word.downloading = true;
+      audio.src = 'upload/' + $scope.recorder + '/' + word.name + '.wav?cb=' + new Date().getTime();
     }
   }
 

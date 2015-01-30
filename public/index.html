@@ -160,8 +160,8 @@
                     <button class="btn btn-sm btn-primary" ng-disabled="word.recording || word.uploading || !canRecord()" ng-click="record(word)">
                         <span class="glyphicon glyphicon-record"></span> Thu âm
                     </button>
-                    <button class="btn btn-sm btn-success" ng-if="word.recorded" ng-click="play(word)">
-                        <span class="glyphicon glyphicon-play-circle"></span> Nghe lại
+                    <button class="btn btn-sm btn-success" ng-if="word.recorded" ng-click="play(word)" ng-disabled="word.downloading || word.playing">
+                        <span class="glyphicon glyphicon-play-circle"></span> {{word.downloading ? "Đang tải" : (word.playing ? "Đang phát" : "Nghe lại")}}
                     </button>
                 </td>
             </tr>
