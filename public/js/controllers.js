@@ -185,13 +185,31 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
   };
   $scope.totalDisplayed = 100;
   $scope.canRecord = WordRecorder.canRecord;
-  $scope.recordProgress = WordRecorder.progress;
 
   // Record options
   $scope.option = {
     "recordLength": 1000,
     "waitingTime": 1000
   };
+
+  // Word stat
+  $scope.stat = {};
+  $scope.stat.diacritic = function(diacritic) {
+    var count = 0;
+    for (var i = 0; i < $scope.words.length; i++) {
+      if ($scope.words[i].diacritic == diacritic)
+        count++;
+    }
+    return count;
+  }
+  $scope.stat.recorded = function(recorded) {
+    var count = 0;
+    for (var i = 0; i < $scope.words.length; i++) {
+      if ($scope.words[i].recorded == recorded)
+        count++;
+    }
+    return count;
+  }
 
   // Option protection
   $scope.$watch('option.recordLength', function(newValue) {
@@ -209,15 +227,7 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
   var reset_pagination = function() {$scope.totalDisplayed = 100;};
   $scope.$watch('filter', reset_pagination, true);
 
-  $scope.totalRecorded = function() {
-    var total = 0;
-    for (var i = 0; i < $scope.words.length; i++) {
-      if ($scope.words[i].recorded)
-        total += 1;
-    }
-    return total;
-  };
-
+  // Fast fuzzy match for filtering
   var fuzzy_match = function(str,pattern){
       if (pattern.length > 0) {
         pattern = pattern.split("").reduce(function(a,b){ return a+".*"+b; });
@@ -227,6 +237,7 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
       }
   };
 
+  // Use filter model to check for a word should appear or not
   $scope.query = function(word) {
     return (
       (word.recorded == false && $scope.filter.status.unrecorded ||
@@ -235,6 +246,7 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
       fuzzy_match(word.name, $scope.filter.name)
     );
   };
+
   $scope.record = function(word) {
     if (!$scope.canRecord)
       return;
@@ -303,6 +315,7 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
     delete $cookies.recorder;
   }
 
+  // Increase page row limit, called when approach bottom of table
   $scope.showMore = function() {
     $scope.totalDisplayed += 100;
     if ($scope.totalDisplayed > $scope.words.length) {

@@ -17,6 +17,8 @@
         .checkbox-group label {margin-right: 10px;}
         .checkbox-group label input {float: left;}
         .jumbotron h2 {margin-top: 0px}
+        .btn-filter {position: relative}
+        .btn-filter .stat {position: absolute; display: block; color: #a7a7a7; left: 0; right: 0; bottom: -22px;}
     </style>
 </head>
 <body style="padding-top: 60px" ng-controller="WordCtrl">
@@ -44,8 +46,8 @@
                         <button type="submit" class="btn btn-default" ng-click="logIn(recorder)">Đăng nhập</button>
                     </form>
                     <ul class="nav navbar-nav navbar-right" ng-if="logged_in">
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{recorder}} <span class="caret"></span></a>
+                        <li class="dropdown" dropdown>
+                            <a href="#" class="dropdown-toggle" dropdown-toggle>{{recorder}} <span class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu">
                                 <li><a href="#" ng-click="logOut()">Đăng xuất</a></li>
                             </ul>
@@ -59,7 +61,7 @@
         <h1>Công cụ thu âm <small>Sử dụng cho <a target="_blank" href="https://github.com/herophuong/vietnamese-words">cơ sở dữ liệu từ đơn tiếng việt <span class="glyphicon glyphicon-new-window"></span></a></small></h1>
     </div>
     <div class="row" ng-if="logged_in">
-        <div class="col-md-3 form-horizontal">
+        <div class="col-md-3 form-horizontal" style="border-right: 1px dashed #babdb6">
             <div class="text-center"><strong>Tuỳ chọn thu</strong></div>
             <div class="form-group" style="margin-top: 6px;">
                 <label for="record-length" class="control-label col-md-7">Thời gian thu (ms)</label>
@@ -74,7 +76,7 @@
                 </div>
             </div>
         </div>
-        <form class="col-md-9" style="border-left: 1px dashed #babdb6">
+        <form class="col-md-9">
             <div class="form-group col-md-3">
                 <label for="filter-name">Tên từ</label>
                 <input id="filter-name" type="text" ng-model="filter.name" class="form-control" />
@@ -82,34 +84,34 @@
             <div class="form-group col-md-6">
                 <label>Thanh điệu</label>
                 <div class="btn-group">
-                    <label class="btn btn-primary" ng-model="filter.diacritic.unmarked" btn-checkbox>
-                        Ngang
+                    <label class="btn btn-primary btn-filter" ng-model="filter.diacritic.unmarked" btn-checkbox>
+                        Ngang<span class="stat">{{::stat.diacritic('unmarked')}}</span>
                     </label>
-                    <label class="btn btn-primary" ng-model="filter.diacritic.acute" btn-checkbox>
-                        Sắc
+                    <label class="btn btn-primary btn-filter" ng-model="filter.diacritic.acute" btn-checkbox>
+                        Sắc<span class="stat">{{::stat.diacritic('acute')}}</span>
                     </label>
-                    <label class="btn btn-primary" ng-model="filter.diacritic.grave" btn-checkbox>
-                        Huyền
+                    <label class="btn btn-primary btn-filter" ng-model="filter.diacritic.grave" btn-checkbox>
+                        Huyền<span class="stat">{{::stat.diacritic('grave')}}</span>
                     </label>
-                    <label class="btn btn-primary" ng-model="filter.diacritic.hook" btn-checkbox>
-                        Hỏi
+                    <label class="btn btn-primary btn-filter" ng-model="filter.diacritic.hook" btn-checkbox>
+                        Hỏi<span class="stat">{{::stat.diacritic('hook')}}</span>
                     </label>
-                    <label class="btn btn-primary" ng-model="filter.diacritic.tilde" btn-checkbox>
-                        Ngã
+                    <label class="btn btn-primary btn-filter" ng-model="filter.diacritic.tilde" btn-checkbox>
+                        Ngã<span class="stat">{{::stat.diacritic('tilde')}}</span>
                     </label>
-                    <label class="btn btn-primary" ng-model="filter.diacritic.dot" btn-checkbox>
-                        Nặng
+                    <label class="btn btn-primary btn-filter" ng-model="filter.diacritic.dot" btn-checkbox>
+                        Nặng<span class="stat">{{::stat.diacritic('dot')}}</span>
                     </label>
                 </div>
             </div>
             <div class="form-group col-md-3">
                 <label>Trạng thái</label><br />
                 <div class="btn-group">
-                    <label class="btn btn-primary" ng-model="filter.status.recorded" btn-checkbox>
-                        <span class="glyphicon glyphicon-ok"></span> Đã thu
+                    <label class="btn btn-primary btn-filter" ng-model="filter.status.recorded" btn-checkbox>
+                        Đã thu<span class="stat">{{stat.recorded(true)}}</span>
                     </label>
-                    <label class="btn btn-primary" ng-model="filter.status.unrecorded" btn-checkbox>
-                        Chưa thu
+                    <label class="btn btn-primary btn-filter" ng-model="filter.status.unrecorded" btn-checkbox>
+                        Chưa thu<span class="stat">{{stat.recorded(false)}}</span>
                     </label>
                 </div>
             </div>
@@ -120,7 +122,7 @@
             <tr>
                 <th width="10%">#</th>
                 <th width="20%">Từ đơn</th>
-                <th width="20%">Trạng thái (Đã thu {{totalRecorded()}}/{{::words.length}})</th>
+                <th width="20%">Trạng thái</th>
                 <th width="20%">Hành động</th>
             </tr>
         </thead>
@@ -129,7 +131,7 @@
                 <td>{{$index + 1}}</td>
                 <td>{{word.name}}</td>
                 <td>
-                    <span class="label label-default" ng-if="!word.uploading && !word.recording && !word.recorded">
+                    <span class="label label-default" ng-if="!word.waiting && !word.recording && !word.uploading && !word.recorded">
                         Chưa thu
                     </span>
                     <span class="label label-default" ng-if="word.waiting">
