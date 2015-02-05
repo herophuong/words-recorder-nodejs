@@ -19,6 +19,7 @@
         .jumbotron h2 {margin-top: 0px}
         .btn-filter {position: relative}
         .btn-filter .stat {position: absolute; display: block; color: #a7a7a7; left: 0; right: 0; bottom: -22px;}
+        span.label { margin-right: 5px; }
     </style>
 </head>
 <body style="padding-top: 60px" ng-controller="WordCtrl">
@@ -115,6 +116,10 @@
                     </label>
                 </div>
             </div>
+            <div class="col-md-12">
+                <br />
+                <strong>Tip:</strong> Chưa chuẩn có thể là do từ đã thu bị ngắt ở đuôi từ, có nhiễu ở đuôi từ hoặc toàn bộ đều là khoảng lặng.
+            </div>
         </form>
     </div>
     <table id="words-table" class="table" ng-if="logged_in && words.length > 0" infinite-scroll="showMore()" infinite-scroll-distance="3">
@@ -151,6 +156,9 @@
                     </span>
                     <span class="label label-success" ng-if="word.recorded && !word.waiting && !word.recording && !word.uploading && !word.downloading && !word.playing">
                       <span class="glyphicon glyphicon-ok"></span> Đã thu
+                    </span>
+                    <span class="label label-danger" ng-if="word.clipped && !word.waiting && !word.recording && !word.uploading ">
+                        <span class="glyphicon glyphicon-alert"></span> Chưa chuẩn
                     </span>
                 <td>
                     <button class="btn btn-sm btn-primary" ng-disabled="word.waiting || word.recording || word.uploading || !canRecord()" ng-click="record(word)">

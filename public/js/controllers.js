@@ -293,6 +293,7 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
             // update word state
             word.recorded = true;
             word.uploading = false;
+            word.clipped = data.message.data.clipped;
           });
         });
       }, null, function (progress) {
