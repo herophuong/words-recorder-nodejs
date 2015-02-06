@@ -186,6 +186,7 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
   };
   $scope.totalDisplayed = 100;
   $scope.canRecord = WordRecorder.canRecord;
+  $scope.menu = {"collapsed": true};
 
   // Record options
   $scope.option = {
@@ -222,7 +223,7 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
   $scope.stat.good = function() {
     var count = 0;
     for (var i = 0; i < $scope.words.length; i++) {
-      if (!$scope.words[i].clipped)
+      if (!$scope.words[i].clipped && $scope.words[i].recorded)
         count++;
     }
     return count;
