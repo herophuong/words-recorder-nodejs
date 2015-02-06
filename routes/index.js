@@ -70,7 +70,7 @@ router.get('/words', function(req, res) {
         return;
       }
 
-      var wordFile, fileStat, mtime, wordRecordedCount = 0, wordCheckedCount = 0;
+      var wordFile, fileStat, mtime, wordRecordedCount = 0, wordCheckedCount = 0, wordCheckQueue = [];
       for (var i = 0; i < words.length; i++) {
         wordFile = words[i].name + '.wav';
         if (files.indexOf(wordFile) > -1) {
@@ -83,31 +83,34 @@ router.get('/words', function(req, res) {
 
           // Check clipped word
           if (!(words[i].checked_mtime && mtime == words[i].checked_mtime)) {
-            (function(word) {
-              child_process.execFile(
-                'bin/has_end_silence.sh',
-                [path.join(recorderWordFolder, wordFile)],
-                function(error, stdout, stderr) {
-                  wordCheckedCount++;
-                  if (stdout.indexOf('1') == 0) {
-                    word.clipped = false;
-                  } else {
-                    word.clipped = true;
-                  }
-                  word.checked_mtime = mtime;
-
-                  if (wordCheckedCount == wordRecordedCount) {
-                    res.send({status: 'ok', message: words});
-                    fs.writeFile(recorderWordList, JSON.stringify(words, null, 2))
-                  }
-                }
-              );
-            })(words[i]);
-          } else {
-            wordCheckedCount++;
+            wordCheckQueue.push(words[i]);
           }
         }
       }
+      // Process queue
+      var processWordQueue = function() {
+        if (wordCheckQueue.length == 0) {
+          res.send({status: 'ok', message: words});
+          fs.writeFile(recorderWordList, JSON.stringify(words, null, 2));
+        } else {
+          var word = wordCheckQueue.shift(),
+              wordFile = word.name + '.wav';
+          child_process.execFile(
+            'bin/has_end_silence.sh',
+            [path.join(recorderWordFolder, wordFile)],
+            function(error, stdout, stderr) {
+              if (stdout.indexOf('1') == 0) {
+                word.clipped = false;
+              } else {
+                word.clipped = true;
+              }
+              word.checked_mtime = mtime;
+              processWordQueue();
+            }
+          );
+        }
+      };
+      processWordQueue();
     });
   }
 

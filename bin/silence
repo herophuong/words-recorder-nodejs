@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+require 'json'
+require 'fileutils'
+require 'parallel'
+
+# Check for uploader name
+recorder = ARGV[0]
+if (recorder.nil?)
+  exit
+end
+# Check for uploader folder
+if (!Dir.exist?('public/upload/' + recorder))
+  exit
+end
+
+# Get the word list
+recorder_folder = 'public/upload/' + recorder
+begin
+  wordList = JSON.parse(open(recorder_folder + '/words.json').read)
+rescue Exception
+  wordList = JSON.parse(open('data/words.json').read)
+end
+
+Parallel.each_with_index(wordList, :in_threads => 4, :progress => "Checking ending silence...") do |word, index|
+  path = 'public/upload/' + recorder + '/' + word['name'] + '.wav'
+  if File.exist?(path)
+    mtime = File.mtime(path).to_i * 1000
+    if word['checked_mtime'] != mtime
+      checked_result = %x[ ./bin/has_end_silence.sh #{path} 2> /dev/null ]
+      if checked_result.index('1') == 0
+        wordList[index]['clipped'] = false
+      else
+        wordList[index]['clipped'] = true
+      end
+      wordList[index]['checked_mtime'] = mtime
+    end
+  end
+end
+
+File.write(recorder_folder + '/words.json', JSON.pretty_generate(wordList))

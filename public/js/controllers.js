@@ -178,7 +178,8 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
       "dot": true
     },
     "status": {
-      "recorded": true,
+      "good": true,
+      "clipped": true,
       "unrecorded": true
     },
     "name" : ""
@@ -206,6 +207,22 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
     var count = 0;
     for (var i = 0; i < $scope.words.length; i++) {
       if ($scope.words[i].recorded == recorded)
+        count++;
+    }
+    return count;
+  }
+  $scope.stat.clipped = function() {
+    var count = 0;
+    for (var i = 0; i < $scope.words.length; i++) {
+      if ($scope.words[i].clipped)
+        count++;
+    }
+    return count;
+  }
+  $scope.stat.good = function() {
+    var count = 0;
+    for (var i = 0; i < $scope.words.length; i++) {
+      if (!$scope.words[i].clipped)
         count++;
     }
     return count;
@@ -241,7 +258,8 @@ trvnApp.controller('WordCtrl', function ($scope, $http, $cookies, WordRecorder, 
   $scope.query = function(word) {
     return (
       (word.recorded == false && $scope.filter.status.unrecorded ||
-      word.recorded && $scope.filter.status.recorded) &&
+      word.clipped == true && $scope.filter.status.clipped ||
+      word.clipped == false && $scope.filter.status.good) &&
       $scope.filter.diacritic[word.diacritic] &&
       fuzzy_match(word.name, $scope.filter.name)
     );
