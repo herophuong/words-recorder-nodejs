@@ -19,4 +19,4 @@
 
         $ npm start
 
-2. Truy cập vào ứng dụng qua `http://localhost:8000`
+2. Truy cập vào ứng dụng qua `http://localhost:3000`
