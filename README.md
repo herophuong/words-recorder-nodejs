@@ -1,19 +1,19 @@
 Ứng dụng thu âm từ đơn tiếng Việt (Node.js)
 =========================
 
-### 1. Yêu cầu
+### I. Yêu cầu
 
 1. [Node.js](https://nodejs.org) và [npm](https://www.npmjs.com/)
 2. [sox](http://sox.sourceforge.net/)
 
-### 2. Cài đặt
+### II. Cài đặt
 
 ```bash
     $ npm install
     $ npm install -g nodemon
 ```
 
-### 3. Sử dụng
+### III. Sử dụng
 
 1. Khởi động server
 
