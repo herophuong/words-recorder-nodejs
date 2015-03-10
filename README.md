@@ -1,6 +1,11 @@
 Ứng dụng thu âm từ đơn tiếng Việt (Node.js)
 =========================
 
+### Yêu cầu
+
+1. [Node.js](https://nodejs.org) và [npm](https://www.npmjs.com/)
+2. [sox](http://sox.sourceforge.net/)
+
 ### Cài đặt:
 
 ```bash
