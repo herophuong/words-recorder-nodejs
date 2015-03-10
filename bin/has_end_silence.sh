@@ -20,7 +20,7 @@ new_length=`sox --i -D $word_trimmed`
 silence_length=`python -c "print $orig_length - $new_length"`
 
 # we need at least 0.02s silence
-required_length=0.02
+required_length=0.01
 result=`echo $silence_length'>'$required_length | bc -l`
 echo $result;
 
