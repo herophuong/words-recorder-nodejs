@@ -81,14 +81,16 @@ router.get('/words', function(req, res) {
           fileStat = fs.statSync(path.join(recorderWordFolder, wordFile));
           mtime = fileStat.mtime.getTime();
 
-          // Check clipped word
+          // Checking clipped-word queue
           if (!(words[i].checked_mtime && mtime == words[i].checked_mtime)) {
+            words[i].gonna_be_mtime = mtime;
             wordCheckQueue.push(words[i]);
           }
         }
       }
       // Process queue
       var processWordQueue = function() {
+        process.stdout.write("Remaining " + wordCheckQueue.length + " file(s) \r");
         if (wordCheckQueue.length == 0) {
           res.send({status: 'ok', message: words});
           fs.writeFile(recorderWordList, JSON.stringify(words, null, 2));
@@ -104,7 +106,8 @@ router.get('/words', function(req, res) {
               } else {
                 word.clipped = true;
               }
-              word.checked_mtime = mtime;
+              word.checked_mtime = word.gonna_be_mtime;
+              delete word.gonna_be_mtime;
               processWordQueue();
             }
           );
